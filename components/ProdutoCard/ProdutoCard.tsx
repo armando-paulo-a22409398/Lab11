@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Produto } from '@/models/interfaces';
+import { useState } from 'react';
 
 interface ProdutoCardProps {
     produto: Produto;
@@ -13,7 +14,8 @@ interface ProdutoCardProps {
 export default function ProdutoCard({ produto, onAddToCart, onRemoveFromCart }: ProdutoCardProps) {
     const imagePrefix = 'https://deisishop.pythonanywhere.com';
     const imageUrl = imagePrefix + produto.image;
-❤️🤍
+  const [like, setLikes] = useState('🤍');
+    
     return (
         <article className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 h-full overflow-hidden">
             <div className="relative w-full h-48 bg-gray-50 p-4 flex items-center justify-center border-b border-gray-100">
@@ -49,7 +51,12 @@ export default function ProdutoCard({ produto, onAddToCart, onRemoveFromCart }: 
                                 + Info
                             </button>
                         </Link>
-                        
+                            <button 
+                                onClick={() => setLikes(like === '🤍' ? '❤️' : '🤍')}
+                                className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors shadow-sm cursor-pointer"
+                            >
+                                {like}
+                            </button>
                         {/* Botão Condicional: Remover (se estiver no carrinho) ou Comprar (se estiver na loja) */}
                         {onRemoveFromCart ? (
                             <button 
@@ -67,7 +74,7 @@ export default function ProdutoCard({ produto, onAddToCart, onRemoveFromCart }: 
                             </button>
                             
                         )}
-                    
+
                     </div>
                 </div>
             </div>
