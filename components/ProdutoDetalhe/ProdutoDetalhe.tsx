@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Produto } from '@/models/interfaces';
 
 interface ProdutoDetalheProps {
@@ -9,24 +10,36 @@ interface ProdutoDetalheProps {
 }
 
 export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
+    const router = useRouter();
     const imagePrefix = 'https://deisishop.pythonanywhere.com';
-    const imageUrl = produto.image.startsWith('http') 
+    
+    // Verificação de segurança para a imagem
+    const imageUrl = produto?.image && produto.image.startsWith('http') 
         ? produto.image 
-        : imagePrefix + produto.image;
+        : imagePrefix + (produto?.image || '');
 
     // Função para adicionar ao carrinho (via localStorage)
-    const handleAddToCart = () => {
+    const handleAddToCart = (redirect: boolean = false) => {
+        // Validação básica antes de prosseguir
+        if (!produto || !produto.id) {
+            alert("Erro: Dados do produto inválidos.");
+            return;
+        }
+
         try {
             const savedCart = localStorage.getItem('cart');
             let cart = savedCart ? JSON.parse(savedCart) : [];
 
-            // Converter para novo formato se necessário
-            if (Array.isArray(cart) && cart.length > 0 && !cart[0].quantity) {
+            // Garantir que cart é um array
+            if (!Array.isArray(cart)) cart = [];
+
+            // Migração de estrutura antiga para nova
+            if (cart.length > 0 && typeof cart[0] === 'object' && !('quantity' in cart[0])) {
                 cart = cart.map((p: any) => ({ product: p, quantity: 1 }));
             }
 
             // Verificar se já existe
-            const existingIndex = cart.findIndex((item: any) => item.product.id === produto.id);
+            const existingIndex = cart.findIndex((item: any) => item?.product?.id === produto.id);
 
             if (existingIndex > -1) {
                 cart[existingIndex].quantity += 1;
@@ -35,12 +48,20 @@ export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
             }
 
             localStorage.setItem('cart', JSON.stringify(cart));
-            alert('Produto adicionado ao carrinho com sucesso!');
+            
+            if (redirect) {
+                router.push('/produtos'); // Redireciona para o checkout
+            } else {
+                alert('Produto adicionado ao carrinho com sucesso!');
+            }
         } catch (error) {
             console.error("Erro ao adicionar:", error);
-            alert("Erro ao adicionar produto.");
+            alert("Erro ao processar o carrinho.");
         }
     };
+
+    // Se o produto não existir, não renderiza nada (previne erros de undefined)
+    if (!produto) return null;
 
     return (
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
@@ -49,7 +70,7 @@ export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
                     <div className="relative w-full h-[400px]">
                         <Image
                             src={imageUrl}
-                            alt={produto.title}
+                            alt={produto.title || "Produto"}
                             fill
                             className="object-contain mix-blend-multiply"
                             priority
@@ -59,18 +80,20 @@ export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
 
                 <div className="p-8 md:p-12 flex flex-col justify-center">
                     <span className="text-sm font-bold text-blue-600 uppercase tracking-widest mb-2">
-                        {produto.category}
+                        {produto.category || "Geral"}
                     </span>
                     
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
                         {produto.title}
                     </h1>
 
-                    <div className="flex items-center mb-6 bg-yellow-50 w-fit px-3 py-1 rounded-full border border-yellow-100">
-                        <span className="text-yellow-500 mr-1 text-lg">★</span>
-                        <span className="font-bold text-gray-700 mr-1">{produto.rating.rate}</span>
-                        <span className="text-gray-400 text-sm">({produto.rating.count} avaliações)</span>
-                    </div>
+                    {produto.rating && (
+                        <div className="flex items-center mb-6 bg-yellow-50 w-fit px-3 py-1 rounded-full border border-yellow-100">
+                            <span className="text-yellow-500 mr-1 text-lg">★</span>
+                            <span className="font-bold text-gray-700 mr-1">{produto.rating.rate}</span>
+                            <span className="text-gray-400 text-sm">({produto.rating.count} avaliações)</span>
+                        </div>
+                    )}
 
                     <p className="text-gray-600 text-lg leading-relaxed mb-8">
                         {produto.description}
@@ -78,15 +101,10 @@ export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
 
                     <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <span className="text-4xl font-bold text-gray-900">
-                            {Number(produto.price).toFixed(2)} €
+                            {Number(produto.price || 0).toFixed(2)} €
                         </span>
                         
-                        <button 
-                            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg hover:shadow-blue-200 transform hover:-translate-y-0.5 cursor-pointer"
-                            onClick={handleAddToCart}
-                        >
-                            Adicionar ao Carrinho
-                        </button>
+
                     </div>
                 </div>
             </div>
