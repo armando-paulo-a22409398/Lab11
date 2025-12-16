@@ -2,7 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['deisishop.pythonanywhere.com'], // adicionar domínio da API
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'deisishop.pythonanywhere.com',
+        pathname: '/media/**',
+      },
+    ],
   },
 };
 
