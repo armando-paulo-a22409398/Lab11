@@ -1,35 +1,28 @@
 'use client'
 
 import useSWR from 'swr';
-import {User} from '@/models/interfaces'
+import { User } from '@/models/interfaces';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function FetchUser() {
-
-    //
-    // A. Fetch de dados
     const { data, error, isLoading } = useSWR<User>('https://jsonplaceholder.typicode.com/users/1', fetcher);
 
-    // data → resultado da API
-    // error → captura de erro
-    // SWR faz cache automático e revalida
+    if (error) return <div>Erro ao carregar utilizador</div>;
+    if (isLoading) return <div>A carregar...</div>;
 
-
-    
-    // 
-    // B. Renderização de componentes
-    if (error) return <p>Erro ao carregar</p>;
-    if (isLoading) return <p>Carregando...</p>
-    if(!data) return <p>Sem utilizadores</p>
-
-    return <section className="bg-blue-300 p-2 pb-4 mt-6 rounded-xl">
-
-        <h2>Fetch de Info de User</h2>
-
-        <p>Nome: {data.name}</p>
-        <p>Email: {data.email}</p>
-        <p>Empresa: {data.company.name}</p>
-    </section>
-
+    return (
+        <section className="bg-gray-100 p-4 rounded-lg my-4 shadow-sm">
+            <h3 className="font-bold text-lg mb-2 text-gray-700">Dados do Utilizador (Fetch)</h3>
+            {data && (
+                <div className="space-y-1 text-sm text-gray-600">
+                    <p><strong>Nome:</strong> {data.name}</p>
+                    <p><strong>Email:</strong> {data.email}</p>
+                    {/* CORREÇÃO: Usar ?. para prevenir erro se company for undefined */}
+                    <p><strong>Empresa:</strong> {data.company?.name || "Sem empresa"}</p>
+                    <p><strong>Cidade:</strong> {data.address?.city}</p>
+                </div>
+            )}
+        </section>
+    );
 }
