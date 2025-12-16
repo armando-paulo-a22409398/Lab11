@@ -6,8 +6,12 @@ export default function Tarefas() {
     //
     // A. Gestão de estados
     const [novaTarefa, setNovaTarefa] = useState<string>("")
+    const [listaTarefa,setListaTarefa] = useState<string[]>([])
     // tarefas, lista de tarefas
-
+    function adicionarTarefa(){
+        setListaTarefa([...listaTarefa, novaTarefa])
+        setNovaTarefa("")
+    }
 
     //
     // B. event handlers (interação do utilizador)
@@ -29,18 +33,18 @@ export default function Tarefas() {
             />
             <button
                 className="bg-green-500 hover:bg-green-600 active:bg-green-700 hover:pointer text-white font-bold py-2 px-4 m-2 border border-green-700 rounded"
-                // onClick = 
+                 onClick = {adicionarTarefa}
             >
                 Adicionar
             </button>
 
             
             <p>Lista de Tarefas:</p>
-            {/* 
+             
             <ul>
-                {tarefas.map((tarefa,index) => <li key={index}>{tarefa}</li> )}
+                {listaTarefa.map((tarefa,index) => <li key={index}>{tarefa}</li> )}
             </ul> 
-            */}
+            
         </section>
     )
 }
