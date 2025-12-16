@@ -38,7 +38,8 @@ export default function ProdutoCard({ produto, onAddToCart, onRemoveFromCart }: 
                 
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50 gap-2">
                     <span className="text-xl font-bold text-gray-900">
-                        {produto.price.toFixed(2)} €
+                        {/* CORREÇÃO: Forçamos a conversão para Number para evitar erros se a API devolver string */}
+                        {Number(produto.price).toFixed(2)} €
                     </span>
                     
                     <div className="flex gap-2">
